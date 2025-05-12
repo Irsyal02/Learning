@@ -1,0 +1,174 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player with Lyrics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .lyric {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .active-lyric {
+            opacity: 1;
+        }
+        .blur-0 {
+            filter: blur(0);
+        }
+        .blur-1 {
+            filter: blur(2px);
+        }
+        .blur-2 {
+            filter: blur(3px);
+        }
+        .blur-3 {
+            filter: blur(3px);
+        }
+        .inactive-lyric {
+            opacity: 0.5;
+            filter: blur(3px);
+            transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+        }
+        #lyrics-inner {
+        transition: transform 0.8s ease-in-out;
+        }
+
+
+    </style>
+</head>
+<body class="bg-gray-900 flex justify-center items-center min-h-screen text-white">
+
+<div class="w-full h-full bg-gray-800  shadow-lg p-0 ">
+    <audio id="audio" controls class="w-full mb-4" loop>
+        <source id="audio-source" src="" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <div class="grid grid-flow-col justify-items-safe">
+        <input type="file" id="audio-file" accept="audio/*" class="block w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-white file:bg-gray-700 file:cursor-pointer">
+        <input type="file" id="lrc-file" accept=".lrc" class="block w-full text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-white file:bg-gray-700 file:cursor-pointer">
+    </div>
+    <div id="lyrics-container" class="relative p-80 pt-70 overflow-hidden bg-black flex items-start justify-start w-full">
+        <div id="lyrics-inner" class="absolute inset-0 flex flex-col items-start justify-start transition-transform space-y-8 p-40 pl-15">
+            <p class="text-gray-400 text">Load a .lrc file to see lyrics here...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const audio = document.getElementById('audio');
+    const audioFileInput = document.getElementById('audio-file');
+    const lrcFileInput = document.getElementById('lrc-file');
+    const lyricsContainer = document.getElementById('lyrics-container');
+    const lyricsInner = document.getElementById('lyrics-inner');
+
+    let lyrics = [];
+
+    function parseLRC(lrcContent) {
+        const lines = lrcContent.split('\n');
+        const lrcData = [];
+
+        for (let i = 0; i < lines.length; i++) {
+            const match1 = lines[i].match(/\[(\d+):(\d+\.\d+)\](.*)/);
+            const match2 = (i + 1 < lines.length) ? lines[i + 1].match(/\[(\d+):(\d+\.\d+)\](.*)/) : null;
+
+            if (match1) {
+                const minutes = parseInt(match1[1]);
+                const seconds = parseFloat(match1[2]);
+                const time = minutes * 60 + seconds;
+                const text = match1[3].trim();
+
+                let translation = '';
+                if (match2 && match2[1] === match1[1] && match2[2] === match1[2]) {
+                    translation = match2[3].trim();
+                    i++; // Skip the next line
+                }
+
+                lrcData.push({ time, text, translation });
+            }
+        }
+
+        return lrcData;
+    }
+
+    function updateLyrics() {
+        const currentTime = audio.currentTime;
+
+        let activeIndex = -1;
+        lyrics.forEach((line, index) => {
+            if (line.time <= currentTime && (!lyrics[index + 1] || lyrics[index + 1].time > currentTime)) {
+                activeIndex = index;
+            }
+        });
+
+        lyricsInner.innerHTML = '';
+        lyrics.forEach((line, index) => {
+            const p = document.createElement('p');
+            p.innerHTML = `
+                <span>${line.text}</span><br>
+                ${line.translation ? `<span class="text-gray-400 text-5xl">${line.translation}</span>` : ''}
+            `;
+            p.className = "lyric font-bold text-gray-200 text-6xl text-left cursor-pointer";
+
+            const distance = Math.abs(index - activeIndex);
+            if (index === activeIndex) {
+                p.classList.add("active-lyric", "blur-0");
+            } else {
+                p.classList.add("inactive-lyric");
+
+                if (distance === 1) p.classList.add("blur-1");
+                else if (distance === 2) p.classList.add("blur-2");
+                else p.classList.add("blur-3");
+            }
+
+            p.addEventListener('click', () => {
+                audio.currentTime = line.time;
+            });
+
+            lyricsInner.appendChild(p);
+        });
+
+
+        if (activeIndex !== -1) {
+            const activeElement = lyricsInner.children[activeIndex];
+            if (activeElement) {
+                const containerHeight = lyricsContainer.offsetHeight;
+                const elementHeight = activeElement.offsetHeight;
+                const offset = activeElement.offsetTop - containerHeight / 2 + elementHeight / 2;
+                lyricsInner.style.transform = `translateY(-${offset}px)`;
+            }
+        } else {
+            lyricsInner.style.transform = 'translateY(0)';
+        }
+    }
+
+    audioFileInput.addEventListener('change', event => {
+        const file = event.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            document.getElementById('audio-source').src = url;
+            audio.load();
+        }
+    });
+
+    lrcFileInput.addEventListener('change', event => {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                lyrics = parseLRC(reader.result);
+                lyricsInner.innerHTML = '<p class="text-gray-400">Lyrics loaded. Play the audio to see them synchronized.</p>';
+                updateLyrics();
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    audio.addEventListener('timeupdate', () => {
+        if (!audio.paused) {
+            requestAnimationFrame(updateLyrics);
+        }
+    });
+</script>
+
+</body>
+</html>

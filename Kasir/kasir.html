@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashier</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; }
+    .modal.active { display: flex; }
+    .alert { display: none; }
+    .alert.active { display: block; }
+  </style>
+</head>
+<body class="bg-white text-gray-800">
+
+<!-- Header -->
+<header class="bg-white shadow-md">
+  <div class="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex h-16 items-center justify-between">
+      <div class="flex-1"><a class="block text-xl font-bold" href="#">KASIRKU!</a></div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="mx-auto p-9 grid grid-cols-2 md:grid-cols-3 gap-11">
+  <!-- Shopping Cart Section -->
+  <section class="col-span-2 bg-white p-9 h-20 px-9">
+    <h2 class="text-3xl font-bold mb-7">Shopping</h2>
+    <div class="text-sm font-bold text-gray-500 flex items-center py-2 mb-4 justify-around border-b-2">
+      <h4>Items</h4><h4>Unit Price</h4><h4>Quantity</h4><h4 class="text-right">Total Price</h4>
+    </div>
+    <div id="cart-items" class="space-y-4 max-h-80 overflow-y-auto pr-4"></div>
+  </section>
+
+  <!-- Summary -->
+  <section class="bg-gray-100 p-9">
+    <h2 class="text-3xl font-bold mb-8">Summary</h2>
+    <div class="text-sm space-y-6 text-gray-400">
+      <div class="block font-bold justify-between flex mb-1">TOTAL ITEMS <span id="total-products-summary" class="inline-block text-black">0</span></div>
+      <div class="block font-bold justify-between flex mb-1">SUBTOTAL <span id="grand-total-summary" class="inline-block text-black">Rp.0</span></div>
+      <div class="block font-bold justify-between flex mb-1 border-b-2 border-gray-300 pb-6">VALUE ADDED TAX <span id="vat-summary" class="text-black inline-block">Rp.0</span></div>
+      <div class="block font-bold justify-between flex mb-1 ">TOTAL PRICE <span id="final-total" class="inline-block text-black">Rp.0</span></div>
+      <div class="block font-bold justify-between flex mb-1 ">CASH
+        <div class="justify-center flex">
+          <div class="text-gray-500">Rp.</div>
+          <input type="text" name="price" id="price" class="w-20 px-1 placeholder:text-gray-400" placeholder="0.00">
+        </div>
+      </div>
+      <div class="block font-bold justify-between flex mb-1 pb-7">
+        CHANGE <span id="change-summary" class="inline-block text-black">Rp.0</span>
+      </div>
+    </div>
+    <button id="checkout-button" type="button" class="w-full bg-black shadow-lg shadow-white text-white font-bold text-sm py-2 hover:bg-white hover:text-black" disabled>PROCEED TO CHECKOUT</button>
+  </section>
+</main>
+
+<!-- Modal -->
+<div id="checkout-modal" class="modal">
+  <div class="bg-white p-5 shadow-lg font-medium w-80">
+    <h1 class="text-2xl font-bold mb-8">Struck Payment</h1>
+    <div class="grid justify-items-center my-2">
+      <p class="text-sm">KASIRKU ONLY</p>
+      <p class="text-sm">PT. KASIRKU CORP, TBK</p>
+    </div>
+    <div class="pb-2 justify-items-center border-b-2 border-dashed border-black mb-1">
+      <p class="text-sm">JL. SHIBUYA NO.9, CIAMIS, TANGGERANG</p>
+      <p class="text-sm">NPWP : 00.000.000,00-000.000</p>
+    </div>
+    <div class="mb-1 my-1 py-1 block flex justify-between border-t-2 border-b-2 border-dashed border-black">
+      <p class="text-sm">Metode Pembayaran: Cash</p>
+      <p class="text-sm">Kasir: Irsal</p>
+    </div>
+    <div class="pb-2 border-t-2 border-b-2 border-dashed border-black mb-1">
+      <p class="text-sm flex justify-between">TOTAL ITEMS: <span id="modal-total-products" class="font-semibold">0</span></p>
+      <p class="text-sm flex justify-between">SUBTOTAL: <span id="modal-subtotal" class="font-semibold">Rp.0</span></p>
+      <p class="text-sm flex justify-between">CASH: <span id="modal-cash" class="font-semibold">Rp.0</span></p>
+      <p class="text-sm flex justify-between">CHANGE: <span id="modal-change" class="font-semibold">Rp.0</span></p>
+      <p class="text-sm flex justify-between">TOTAL: <span id="modal-total" class="font-semibold">Rp.0</span></p>
+      <p class="text-sm flex justify-center">VAT: (<span id="modal-vat" class="font-semibold">Rp.0</span>)</p>
+    </div>
+    <div class="flex justify-between mb-2">
+      <p class="text-sm">Tgl: <span id="date" class="font-semibold"></span></p>
+      <p class="text-sm"><span id="time" class="font-semibold"></span></p>
+    </div>
+    <div class="mb-2 flex justify-between border-t-2 border-dashed border-black">
+      <p class="text-sm">Kritik&Saran:</p>
+      <p class="text-sm">WhatsApp: 083106418648</p>
+    </div>
+    <div class="mb-1 mt-3 p-3 justify-items-center border-t-2 border-dashed border-black">
+      <p class="text-sm">Terima Kasih!</p>
+    </div>
+    <button id="close-modal" class="my-2 w-full bg-red-500 text-white font-medium py-2 hover:bg-red-600">PRINT</button>
+  </div>
+</div>
+
+<!-- Success Notification -->
+<div id="success-alert" class="alert bg-white rounded-xl border border-gray-100 p-4 absolute top-4 right-4 shadow-lg">
+  <div class="flex items-start gap-4">
+    <span class="text-green-600">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </span>
+    <div class="flex-1">
+      <strong class="block font-medium text-gray-900">Struk Sedang Diproses</strong>
+      <p class="mt-1 text-sm text-gray-700">Jangan Lupa Kembalian Pelanggan.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const cartItems = [
+  { id: 1, name: "Sandqvist Zack", price: 775666, quantity: 0 },
+  { id: 2, name: "Product B", price: 500000, quantity: 0 },
+];
+
+const cartContainer = document.getElementById("cart-items");
+const grandTotalSummary = document.getElementById("grand-total-summary");
+const totalProductsSummary = document.getElementById("total-products-summary");
+const vatSummary = document.getElementById("vat-summary");
+const finalTotal = document.getElementById("final-total");
+const cashInput = document.getElementById("price");
+const changeDisplay = document.getElementById("change-summary");
+
+const checkoutButton = document.getElementById("checkout-button");
+const modal = document.getElementById("checkout-modal");
+const closeModal = document.getElementById("close-modal");
+
+const modalTotalProducts = document.getElementById("modal-total-products");
+const modalSubtotal = document.getElementById("modal-subtotal");
+const modalVat = document.getElementById("modal-vat");
+const modalTotal = document.getElementById("modal-total");
+const modalChange = document.getElementById("modal-change");
+const modalCash = document.getElementById("modal-cash");
+
+const dateElement = document.getElementById("date");
+const timeElement = document.getElementById("time");
+
+const successAlert = document.getElementById("success-alert");
+
+function updateCart() {
+  cartContainer.innerHTML = "";
+  let subtotal = 0;
+  let totalProducts = 0;
+
+  cartItems.forEach((item) => {
+    subtotal += item.price * item.quantity;
+    totalProducts += item.quantity;
+
+    const row = document.createElement("div");
+    row.className = "flex items-center p-2";
+
+    row.innerHTML = `
+      <div class="flex items-center space-x-4 w-1/4">
+        <div>
+          <h3 class="text-1xl font-medium">${item.name}</h3>
+          <p class="text-sm text-gray-500">${item.name.replace(/\s+/g, "").toLowerCase()}123</p>
+        </div>
+      </div>
+      <p class="font-medium text-center w-1/2">Rp.${Math.floor(item.price).toLocaleString()}</p>
+      <div class="flex items-center justify-center w-1/3 space-x-4">
+        <button class="w-8 h-8 flex items-center justify-center border bg-gray-300 hover:bg-gray-400" onclick="changeQuantity(${item.id}, -1)">-</button>
+        <span class="w-8 text-center">${item.quantity}</span>
+        <button class="w-8 h-8 flex items-center justify-center border bg-gray-300 hover:bg-gray-400" onclick="changeQuantity(${item.id}, 1)">+</button>
+      </div>
+      <p class="font-medium text-right w-1/3">Rp.${Math.floor(item.price * item.quantity).toLocaleString()}</p>
+    `;
+    cartContainer.appendChild(row);
+  });
+
+  const vat = Math.floor(subtotal * 0.12);
+  const total = Math.floor(subtotal + vat);
+
+  grandTotalSummary.textContent = `Rp.${subtotal.toLocaleString("id-ID")}`;
+  totalProductsSummary.textContent = totalProducts;
+  vatSummary.textContent = `Rp.${vat.toLocaleString("id-ID")}`;
+  finalTotal.textContent = `Rp.${total.toLocaleString("id-ID")}`;
+
+  validateCheckoutButtonWithCash();
+}
+
+function validateCheckoutButtonWithCash() {
+  const subtotal = parseInt(grandTotalSummary.textContent.replace(/[^0-9]/g, "")) || 0;
+  const cash = parseInt(cashInput.value.replace(/[^0-9]/g, "")) || 0;
+  const total = parseInt(finalTotal.textContent.replace(/[^0-9]/g, "")) || 0;
+
+  if (subtotal === 0 || cash < total) {
+    checkoutButton.disabled = true;
+  } else {
+    checkoutButton.disabled = false;
+  }
+}
+
+function changeQuantity(id, delta) {
+  const item = cartItems.find((item) => item.id === id);
+  if (item) {
+    item.quantity = Math.max(0, item.quantity + delta);
+    updateCart();
+  }
+}
+
+function calculateChange() {
+  const total = parseInt(finalTotal.textContent.replace(/[^0-9]/g, "")) || 0;
+  const cash = parseInt(cashInput.value.replace(/[^0-9]/g, "")) || 0;
+
+  if (cash >= total) {
+    const change = cash - total;
+    changeDisplay.textContent = `Rp.${change.toLocaleString("id-ID")}`;
+  } else {
+    changeDisplay.textContent = "Rp.0";
+  }
+  validateCheckoutButtonWithCash();
+}
+
+function formatCashInput(event) {
+  const value = event.target.value.replace(/[^0-9]/g, "");
+  if (value) {
+    event.target.value = parseInt(value, 10).toLocaleString("id-ID");
+  } else {
+    event.target.value = "";
+  }
+  calculateChange();
+  validateCheckoutButtonWithCash();
+}
+
+function showModal() {
+  const subtotal = parseInt(grandTotalSummary.textContent.replace(/[^0-9]/g, "")) || 0;
+  const vat = parseInt(vatSummary.textContent.replace(/[^0-9]/g, "")) || 0;
+  const total = parseInt(finalTotal.textContent.replace(/[^0-9]/g, "")) || 0;
+  const cash = parseInt(cashInput.value.replace(/[^0-9]/g, "")) || 0;
+
+  if (subtotal === 0 || vat === 0 || total === 0 || cash < total) {
+    alert("Data summary atau cash masih tidak valid. Pastikan semua nilai valid sebelum melanjutkan.");
+    return;
+  }
+
+  // Sinkronisasi data modal
+  modalTotalProducts.textContent = totalProductsSummary.textContent;
+  modalSubtotal.textContent = `Rp.${subtotal.toLocaleString("id-ID")}`;
+  modalVat.textContent = `Rp.${vat.toLocaleString("id-ID")}`;
+  modalTotal.textContent = `Rp.${total.toLocaleString("id-ID")}`;
+  modalCash.textContent = `Rp.${cash.toLocaleString("id-ID")}`;
+  modalChange.textContent = changeDisplay.textContent;
+
+  const now = new Date();
+  dateElement.textContent = now.toLocaleDateString("id-ID");
+  timeElement.textContent = now.toLocaleTimeString("id-ID");
+
+  modal.classList.add("active");
+}
+
+function closeModalHandler() {
+  modal.classList.remove("active");
+  showSuccessAlert();
+}
+
+function showSuccessAlert() {
+  successAlert.classList.add("active");
+  setTimeout(() => successAlert.classList.remove("active"), 2000);
+}
+
+cashInput.addEventListener("input", formatCashInput);
+checkoutButton.addEventListener("click", showModal);
+closeModal.addEventListener("click", closeModalHandler);
+
+updateCart();
+validateCheckoutButtonWithCash();
+</script>
+
+</body>
+</html>
+
