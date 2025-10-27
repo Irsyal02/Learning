@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menjalankan Script</title>
+    <script type="text/javascript">
+        function tambah_kalimat()
+        {
+            var a = document.getElementById("div_kalimat");
+            a.innerHTML+="<p>NIM Saya Adalah 12345678"
+        }
+    </script>
+</head>
+<body>
+    <h1> java script </h1>   
+    <p>Menjalankan javascript</p>
+    klik Tombol Ini Untuk Menambahkan Kalimat Baru:
+
+    <button id = "tambah" onclick="tambah_kalimat()">Masukan NIM Anda</button>
+
+    <div id="div_kalimat"></div>
+</body>
+</html>

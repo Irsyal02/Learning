@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencabangan IF ELSE Majemuk</title>
+</head>
+<body>
+    <script language="JavaScript">
+        <!--
+            function hitungip()
+{
+            var quis = parseFloat(document.fform.iquis.value);
+            var tugas = parseFloat(document.fform.itugas.value);
+            var uts = parseFloat(document.fform.iuts.value);
+            var uas = parseFloat(document.fform.iuas.value);
+            var ip = " ";
+            var ket = "";
+            var na = (0.10*quis)+(0.20*tugas)+(0.30*uts)+(0.40*uas);
+
+            if ((na > 80) && (na <=100))
+            {
+                ip = "A";
+                ket = "Lulusan Dengan Sangat Baik";
+            }
+            else if ((na > 68) && (na <= 80))
+            {
+                ip = "B";
+                ket = "Lulusan Dengan Baik"
+            }
+            else if ((na > 55) && (na <= 68))
+            {
+                ip = "C";
+                ket = "Lulusan Dengan Cukup"
+            }
+            else if ((n > 38) && (na <= 55))
+            {
+                ip = "D";
+                ket = "Lulus Dengan Kurang"
+            }
+            else
+            {
+                ip = "E";
+                ket = "Tisak Lulus";
+            }
+            document.fform.value=ip;
+            document.fform.value=ket;
+            //Gunakan untuk mengecek alert (ip+""+na);
+}
+            //-->
+    </script>
+    <form name="fform">
+        <table border="1" width="100%" align="center">
+            <tr>
+                <td width="100%" colspan="4"><h2 align="center">Menghitung Indeks Prestasi</h2></td>
+            </tr>
+            <tr>
+                <td width="25%">Quis (10%) : <input type="text" size="10" name="iquis"></td>
+                <td width="25%">Tugas (20%) : <input type="text" size="10" name="itugas"></td>
+                <td width="25%">UTS (30%) : <input type="text" size="10" name="iuts"></td>
+                <td width="25%">UAS (40%) : <input type="text" size="10" name="iuas"></td>
+            </tr>
+            <tr>
+                <td width="100%" colspan="4">
+                    <p align="center">
+                        <input type="button" value="Hitung" onclick="hitungip()">
+                        <input type="reset" value="Ulang"></p></td>
+            </tr>
+            <tr></tr>
+        </table>
+    </form>
+</body>
+</html>
